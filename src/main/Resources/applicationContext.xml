@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--mapper层配置开始 -->
+    <!-- 引入连接池的文件 -->
+    <context:property-placeholder   location="classpath:dbcp.properties" />
+    <!--配置连接池-->
+    <bean id="BasicDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${db.driverClassName}"/>
+        <property name="url" value="${db.url}"/>
+        <property name="username" value="${db.username}"/>
+        <property name="password" value="${db.password}"/>
+    </bean>
+
+    <!--配置Sqlsession工厂-->
+    <bean id="sqlsessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="BasicDataSource"/>
+        <property name="mapperLocations" value="classpath:com/ssm_maven/mapper/*Mapper.xml"/>
+        <!--给domain层配置别名-->
+        <property name="typeAliasesPackage" value="com.ssm_maven.domain"/>
+    </bean>
+    <!--扫描mapper接口的包路径-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.ssm_maven.mapper"/>
+    </bean>
+
+    <!--mapper层配置结束-->
+
+
+    <!--service层配置开始-->
+    <!--开启service层的组件扫描-->
+    <context:component-scan base-package="com.ssm_maven.service"/>
+    <!-- 事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="BasicDataSource"></property>
+    </bean>
+
+    <!-- 事务管理 -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!--service层配置结束-->
+</beans>
